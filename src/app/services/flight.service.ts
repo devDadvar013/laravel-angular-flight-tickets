@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, map } from 'rxjs';
 import { Airport, CabinClass, Flight, SearchQuery } from '../models/flight';
+import { API_BASE_URL } from './api-base-url';
 
 /**
  * Bundled fallback airport list. Shown instantly while the server list loads,
@@ -25,7 +26,7 @@ export const AIRPORTS: Airport[] = [
 @Injectable({ providedIn: 'root' })
 export class FlightService {
   private readonly http = inject(HttpClient);
-  private readonly api = '/api/v1';
+  private readonly api = inject(API_BASE_URL);
 
   /** Server-provided airports; starts with the bundled list until fetched. */
   private readonly airportsSubject = new BehaviorSubject<Airport[]>(AIRPORTS);

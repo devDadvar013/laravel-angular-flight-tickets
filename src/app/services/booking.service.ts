@@ -2,11 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, map } from 'rxjs';
 import { Booking, Flight, Passenger } from '../models/flight';
+import { API_BASE_URL } from './api-base-url';
 
 @Injectable({ providedIn: 'root' })
 export class BookingService {
   private readonly http = inject(HttpClient);
-  private readonly api = '/api/v1';
+  private readonly api = inject(API_BASE_URL);
 
   /** Flights selected so far for the current booking (outbound + optional return) */
   private readonly _selected = new BehaviorSubject<Flight[]>([]);

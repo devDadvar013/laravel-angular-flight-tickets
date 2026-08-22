@@ -4,6 +4,9 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { firstValueFrom, skip } from 'rxjs';
 import { FlightService } from './flight.service';
 import { Flight, SearchQuery } from '../models/flight';
+import { API_BASE_URL } from './api-base-url';
+
+const BASE = 'https://laravel-flight-tickets.onrender.com/api/v1';
 
 function query(overrides: Partial<SearchQuery> = {}): SearchQuery {
   return {
@@ -43,7 +46,11 @@ describe('FlightService', () => {
   beforeEach(() => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: API_BASE_URL, useValue: BASE },
+      ],
     });
     service = TestBed.inject(FlightService);
     http = TestBed.inject(HttpTestingController);
@@ -55,7 +62,7 @@ describe('FlightService', () => {
 
   it('starts with the bundled airports and replaces them with the server list', async () => {
     const promise = firstValueFrom(service.airports$.pipe(skip(1)));
-    const req = http.expectOne('/api/v1/airports');
+    const req = http.expectOne(`${BASE}/airports`);
     req.flush({ data: [{ code: 'THR', city: 'تهران', name: 'مهرآباد' }] });
     const airports = await promise;
     expect(airports).toEqual([{ code: 'THR', city: 'تهران', name: 'مهرآباد' }]);
@@ -64,8 +71,8 @@ describe('FlightService', () => {
   it('searches flights through the API with the query as params', async () => {
     const promise = firstValueFrom(service.search(query()));
     // The service constructor fetches airports first
-    http.expectOne('/api/v1/airports').flush({ data: [] });
-    const req = http.expectOne((r) => r.url === '/api/v1/flights/search' && r.method === 'GET');
+    http.expectOne(`${BASE}/airports`).flush({ data: [] });
+    const req = http.expectOne((r) => r.url === `${BASE}/flights/search` && r.method === 'GET');
     expect(req.request.params.get('from')).toBe('THR');
     expect(req.request.params.get('to')).toBe('MHD');
     expect(req.request.params.get('date')).toBe('2026-09-01');
@@ -82,8 +89,8 @@ describe('FlightService', () => {
     const id = 'THR|MHD|2026-09-01|3|اکونومی';
     const promise = firstValueFrom(service.getFlightById(id));
     // The service constructor fetches airports first
-    http.expectOne('/api/v1/airports').flush({ data: [] });
-    const req = http.expectOne((r) => r.url === '/api/v1/flights/search');
+    http.expectOne(`${BASE}/airports`).flush({ data: [] });
+    const req = http.expectOne((r) => r.url === `${BASE}/flights/search`);
     req.flush({ data: { outbound: [flightFixture(id)], return: null } });
     const found = await promise;
     expect(found?.id).toBe(id);
