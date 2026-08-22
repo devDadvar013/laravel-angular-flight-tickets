@@ -36,7 +36,17 @@ export class FlightService {
     this.http
       .get<{ data: Airport[] }>(`${this.api}/airports`)
       .subscribe({
-        next: (res) => this.airportsSubject.next(res.data),
+        next: (res) => {
+          // Merge server airports into the bundled list so we never lose
+          // any local airport (the server may return an empty / partial list).
+          const merged = [...AIRPORTS];
+          for (const a of res.data) {
+            if (!merged.some((m) => m.code === a.code)) {
+              merged.push(a);
+            }
+          }
+          this.airportsSubject.next(merged);
+        },
         // Keep the bundled fallback list on failure.
         error: () => undefined,
       });

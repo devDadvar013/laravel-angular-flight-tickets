@@ -60,12 +60,20 @@ describe('FlightService', () => {
     http.verify();
   });
 
-  it('starts with the bundled airports and replaces them with the server list', async () => {
+  it('starts with the bundled airports and merges server additions', async () => {
+    // The initial emission is the bundled list (12 airports).
+    const initial = await firstValueFrom(service.airports$);
+    expect(initial.length).toBeGreaterThanOrEqual(12);
+
+    // After a server response with a partial / empty list, all bundled
+    // airports remain — the list is never replaced, only appended to.
     const promise = firstValueFrom(service.airports$.pipe(skip(1)));
     const req = http.expectOne(`${BASE}/airports`);
-    req.flush({ data: [{ code: 'THR', city: 'تهران', name: 'مهرآباد' }] });
-    const airports = await promise;
-    expect(airports).toEqual([{ code: 'THR', city: 'تهران', name: 'مهرآباد' }]);
+    req.flush({ data: [{ code: 'ZZZ', city: 'تست', name: 'فرودگاه تست' }] });
+    const merged = await promise;
+    // Should still have all original airports plus the new one.
+    expect(merged.length).toBeGreaterThanOrEqual(12 + 1);
+    expect(merged.some((a) => a.code === 'ZZZ')).toBe(true);
   });
 
   it('searches flights through the API with the query as params', async () => {
