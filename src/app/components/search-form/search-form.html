@@ -1,0 +1,119 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="card bg-base-100 text-base-content shadow-xl border border-base-300">
+  <div class="card-body gap-4 p-5 sm:p-6">
+    <!-- Trip type -->
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="join">
+        <input
+          type="radio"
+          class="btn btn-sm join-item"
+          name="tripType"
+          value="roundtrip"
+          formControlName="tripType"
+          aria-label="رفت و برگشت" />
+        <input
+          type="radio"
+          class="btn btn-sm join-item"
+          name="tripType"
+          value="oneway"
+          formControlName="tripType"
+          aria-label="یک‌طرفه" />
+      </div>
+      <label class="label cursor-pointer gap-2 text-sm">
+        <span>کابین:</span>
+        <app-dropdown class="w-32" [options]="cabinOptions" formControlName="cabinClass" />
+      </label>
+    </div>
+
+    <!-- Route -->
+    <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 items-end">
+      <label class="form-control w-full">
+        <div class="label py-0 pb-1">
+          <span class="label-text text-sm">مبدا</span>
+        </div>
+        <app-dropdown [options]="airportOptions" formControlName="from" placeholder="مبدا را انتخاب کنید" />
+      </label>
+
+      <button
+        type="button"
+        class="btn btn-circle btn-outline btn-primary self-center"
+        (click)="swapCities()"
+        title="جابه‌جایی مبدا و مقصد"
+        aria-label="جابه‌جایی مبدا و مقصد">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>
+        </svg>
+      </button>
+
+      <label class="form-control w-full">
+        <div class="label py-0 pb-1">
+          <span class="label-text text-sm">مقصد</span>
+        </div>
+        <app-dropdown [options]="airportOptions" formControlName="to" placeholder="مقصد را انتخاب کنید" />
+      </label>
+    </div>
+
+    <!-- Dates + passengers -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div #departureBox class="form-control w-full">
+        <div class="label py-0 pb-1">
+          <span class="label-text text-sm">تاریخ رفت</span>
+        </div>
+        <ng-persian-datepicker
+          (dateOnSelect)="onDateSelect($event, 'date')"
+          (uiIsVisibleChange)="scrollPickerIntoView($event, departureBox)"
+          [dateMin]="todayTs"
+          [uiTodayBtnEnable]="false"
+          [uiInitViewMode]="'day'"
+          class="w-full">
+          <input type="text" [formControl]="departureControl" placeholder="۱۴۰۴/۰۴/۱۵" class="input input-bordered w-full" />
+        </ng-persian-datepicker>
+      </div>
+
+      <ng-container *ngIf="tripType.value === 'roundtrip'">
+        <div #returnBox class="form-control w-full">
+          <div class="label py-0 pb-1">
+            <span class="label-text text-sm">تاریخ برگشت</span>
+          </div>
+          <ng-persian-datepicker
+            (dateOnSelect)="onDateSelect($event, 'returnDate')"
+            (uiIsVisibleChange)="scrollPickerIntoView($event, returnBox)"
+            [dateMin]="todayTs"
+            [uiTodayBtnEnable]="false"
+            [uiInitViewMode]="'day'"
+            class="w-full">
+            <input type="text" [formControl]="returnDateControl" placeholder="۱۴۰۴/۰۴/۱۶" class="input input-bordered w-full" />
+          </ng-persian-datepicker>
+        </div>
+      </ng-container>
+
+      <label class="form-control w-full" [class.sm:col-span-2]="tripType.value !== 'roundtrip'">
+        <div class="label py-0 pb-1">
+          <span class="label-text text-sm">تعداد مسافر</span>
+        </div>
+        <app-dropdown [options]="passengerOptions" formControlName="passengers" placeholder="تعداد مسافر" />
+      </label>
+    </div>
+
+    <!-- Validation feedback -->
+    <div role="alert" *ngIf="submitted && form.invalid" class="alert alert-error text-sm">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+      </svg>
+      <span>
+        <ng-container *ngIf="form.errors?.['sameCities']">مبدا و مقصد نمی‌توانند یکسان باشند.</ng-container>
+        <ng-container *ngIf="form.errors?.['returnDateRequired']">برای سفر رفت و برگشت، تاریخ برگشت را انتخاب کنید.</ng-container>
+        <ng-container *ngIf="!form.errors?.['sameCities'] && !form.errors?.['returnDateRequired']">
+          لطفاً همه‌ی فیلدهای لازم را کامل کنید.
+        </ng-container>
+      </span>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit" class="btn btn-primary btn-lg w-full text-lg">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+      </svg>
+      جستجوی پرواز
+    </button>
+  </div>
+</form>

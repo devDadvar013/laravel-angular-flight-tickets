@@ -1,0 +1,40 @@
+<div class="relative" [class.opacity-60]="disabled">
+  <button
+    type="button"
+    class="select select-bordered w-full flex items-center justify-between gap-2 px-3"
+    [disabled]="disabled"
+    [attr.aria-expanded]="open"
+    (click)="toggle()">
+    <span class="truncate text-right" [class.opacity-70]="!selectedOption">
+      {{ selectedOption ? selectedOption.label : placeholder() }}
+    </span>
+  </button>
+
+  <div
+    *ngIf="open"
+    class="absolute z-30 mt-1 w-full rounded-box border border-base-300 bg-base-100 shadow-lg"
+    [class.overflow-auto]="true">
+    <ul class="menu menu-sm w-full p-1 gap-0.5">
+      <li *ngFor="let opt of options()">
+        <button
+          type="button"
+          class="w-full justify-between text-right transition-colors hover:bg-primary hover:text-primary-content"
+          [class.menu-active]="opt.value === value"
+          (click)="select(opt)">
+          <span>{{ opt.label }}</span>
+          <svg
+            *ngIf="opt.value === value"
+            class="h-4 w-4 shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </button>
+      </li>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,61 @@
+<div class="container mx-auto px-4 py-8">
+  <!-- Lookup form -->
+  <div class="card bg-base-100 border border-base-300 shadow-lg max-w-xl mx-auto">
+    <div class="card-body">
+      <div class="flex items-center gap-3 mb-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+        <div>
+          <h1 class="text-xl font-extrabold">پیگیری رزرو</h1>
+          <p class="text-xs opacity-70">با وارد کردن کد رزرو، بلیط‌های خود را مشاهده کنید.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="lookup()" class="flex gap-2 mt-3">
+        <input
+          formControlName="ref"
+          type="text"
+          placeholder="مثلاً 47ZJWE"
+          dir="ltr"
+          class="input input-bordered flex-1 font-mono uppercase tracking-widest"
+        />
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid || loading">
+          <span *ngIf="loading" class="loading loading-spinner loading-sm"></span>
+          <span *ngIf="!loading">جستجو</span>
+        </button>
+      </form>
+
+      <p class="text-xs opacity-60 mt-2 flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+        </svg>
+        کد رزرو شما حداقل ۶ کاراکتر است (مثل <span dir="ltr" class="font-mono">47ZJWE</span>)
+      </p>
+
+      <p *ngIf="form.get('ref')?.invalid && form.get('ref')?.touched" class="text-error text-xs mt-1">
+        کد رزرو باید حداقل ۶ کاراکتر باشد.
+      </p>
+
+      <!-- Error -->
+      <div *ngIf="error" class="alert alert-error mt-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+        </svg>
+        <span>{{ error }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket -->
+  <div *ngIf="booking" class="mt-8">
+    <div class="text-center mb-6">
+      <h2 class="text-xl font-extrabold">بلیط‌های رزرو شده</h2>
+      <p class="text-sm opacity-70 mt-1">
+        کد رزرو:
+        <span class="font-mono font-bold text-primary" dir="ltr">{{ booking.ref }}</span>
+      </p>
+    </div>
+    <app-ticket-view [booking]="booking" />
+  </div>
+</div>

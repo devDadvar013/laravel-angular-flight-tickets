@@ -1,0 +1,78 @@
+/* Tailwind v4 + daisyUI design system (https://github.com/saadeghi/daisyui) */
+@import "@fontsource-variable/vazirmatn";
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: winter --default;
+}
+
+/* Persian font — Vazirmatn (https://github.com/rastikerdar/vazirmatn) */
+:root {
+  font-family: "Vazirmatn Variable", "Vazirmatn", system-ui, -apple-system, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Vazirmatn Variable", "Vazirmatn", system-ui, -apple-system, sans-serif;
+  @apply bg-base-200 text-base-content;
+}
+
+/* Digits and punctuation rendered with Persian numerals */
+.fa-num {
+  font-feature-settings: "ss01";
+}
+
+/* Keep native form controls readable regardless of inherited colors */
+select,
+select option {
+  color: var(--color-base-content);
+  background-color: var(--color-base-100);
+}
+
+/* Focus state for form controls: daisyUI's default turns the border and
+   outline into the dark base-content color, which reads as a black ring.
+   Replace it with a subtle primary-blue border and no outline ring.
+   The selector is not element-qualified so it also covers the custom
+   <button class="select"> dropdowns. */
+.select:focus,
+.select:focus-within,
+.select:open,
+input.input:focus,
+textarea.textarea:focus {
+  --input-color: var(--color-primary) !important;
+  outline: none !important;
+}
+
+/* Ticket-style dashed separators */
+.ticket-dash {
+  background-image: linear-gradient(to left, transparent 30%, rgba(0, 0, 0, 0.15) 30%, rgba(0, 0, 0, 0.15) 70%, transparent 70%);
+  background-size: 12px 2px;
+  background-repeat: repeat-x;
+  background-position: center;
+  height: 2px;
+}
+
+/* Fake barcode for the ticket */
+.barcode {
+  background-image: repeating-linear-gradient(
+    to right,
+    currentColor 0 2px,
+    transparent 2px 4px,
+    currentColor 4px 7px,
+    transparent 7px 9px,
+    currentColor 9px 10px,
+    transparent 10px 14px,
+    currentColor 14px 18px,
+    transparent 18px 19px
+  );
+  height: 56px;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

@@ -1,0 +1,115 @@
+<div class="container mx-auto px-4 py-6">
+  <div class="breadcrumbs text-sm mb-4">
+    <ul>
+      <li><a routerLink="/">خانه</a></li>
+      <li><a routerLink="/results">نتایج</a></li>
+      <li class="text-base-content/70">تکمیل اطلاعات</li>
+    </ul>
+  </div>
+
+  <h1 class="text-2xl sm:text-3xl font-extrabold mb-2">تکمیل اطلاعات مسافران</h1>
+  <p class="text-sm opacity-70 mb-6">
+    لطفاً مشخصات دقیق {{ query.passengers }} مسافر را وارد کنید. کد ملی برای صدور بلیط الزامی است.
+  </p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+    <!-- Passenger forms -->
+    <div class="flex flex-col gap-5" formArrayName="passengers">
+      <fieldset
+        *ngFor="let group of passengerGroups; let i = index"
+        class="card bg-base-100 border border-base-300 shadow-sm"
+        [formGroupName]="i">
+        <legend class="px-3 ml-4 text-sm font-bold text-primary">
+          مسافر {{ i + 1 }} از {{ passengerGroups.length }}
+        </legend>
+        <div class="card-body gap-4 pt-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="form-control w-full">
+              <div class="label py-0 pb-1"><span class="label-text">نام</span></div>
+              <input formControlName="firstName" type="text" placeholder="مثلاً علی" class="input input-bordered w-full" />
+              <div *ngIf="group.get('firstName')!.touched && group.get('firstName')!.invalid" class="label py-0 pt-1">
+                <span class="label-text-alt text-error">نام الزامی است (حداقل ۲ حرف)</span>
+              </div>
+            </label>
+            <label class="form-control w-full">
+              <div class="label py-0 pb-1"><span class="label-text">نام خانوادگی</span></div>
+              <input formControlName="lastName" type="text" placeholder="مثلاً احمدی" class="input input-bordered w-full" />
+              <div *ngIf="group.get('lastName')!.touched && group.get('lastName')!.invalid" class="label py-0 pt-1">
+                <span class="label-text-alt text-error">نام خانوادگی الزامی است (حداقل ۲ حرف)</span>
+              </div>
+            </label>
+            <label class="form-control w-full">
+              <div class="label py-0 pb-1"><span class="label-text">کد ملی</span></div>
+              <input formControlName="nationalId" type="text" inputmode="numeric" maxlength="10" placeholder="۱۰ رقم" class="input input-bordered w-full" />
+              <div *ngIf="group.get('nationalId')!.touched && group.get('nationalId')!.invalid" class="label py-0 pt-1">
+                <span class="label-text-alt text-error">کد ملی باید ۱۰ رقم باشد</span>
+              </div>
+            </label>
+            <label class="form-control w-full">
+              <div class="label py-0 pb-1"><span class="label-text">شماره موبایل</span></div>
+              <input formControlName="phone" type="tel" inputmode="numeric" maxlength="11" placeholder="0912xxxxxxx" class="input input-bordered w-full" />
+              <div *ngIf="group.get('phone')!.touched && group.get('phone')!.invalid" class="label py-0 pt-1">
+                <span class="label-text-alt text-error">شماره موبایل معتبر نیست (09xxxxxxxxx)</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <!-- Summary sidebar -->
+    <aside class="card bg-base-100 border border-base-300 shadow-sm lg:sticky lg:top-24">
+      <div class="card-body gap-4">
+        <h2 class="card-title text-base">خلاصه سفر</h2>
+
+        <div class="flex flex-col gap-3">
+          <div *ngFor="let flight of flights; let i = index" class="rounded-box bg-base-200 p-3">
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="badge badge-primary badge-sm">
+                {{ flights.length > 1 ? (i === 0 ? 'رفت' : 'برگشت') : 'بلیت' }}
+              </span>
+              <span class="opacity-60" dir="ltr">{{ flight.flightNumber }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm font-bold mt-2">
+              <span dir="ltr">{{ formatTime(flight.departure) }}</span>
+              <span class="text-xs opacity-60">{{ legLabel(flight) }}</span>
+              <span dir="ltr">{{ formatTime(flight.arrival) }}</span>
+            </div>
+            <div class="text-xs opacity-60 mt-1">{{ flight.airline }} · {{ flight.cabinClass }}</div>
+          </div>
+        </div>
+
+        <div class="ticket-dash"></div>
+
+        <div class="flex justify-between text-sm">
+          <span>قیمت هر نفر</span>
+          <span>{{ formatPrice((unitPrice$ | async) ?? 0) }} تومان</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span>تعداد مسافر</span>
+          <span>{{ formatPassengers(query.passengers) }}</span>
+        </div>
+
+        <div class="ticket-dash"></div>
+
+        <div class="flex justify-between items-center">
+          <span class="font-bold">مبلغ قابل پرداخت</span>
+          <span class="text-xl font-extrabold text-primary">
+            {{ formatPrice((total$ | async) ?? 0) }} تومان
+          </span>
+        </div>
+
+        <div *ngIf="submitError" class="alert alert-error text-sm py-2">
+          <span>ثبت رزرو با خطا مواجه شد. لطفاً دوباره تلاش کنید.</span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-full" [disabled]="submitting">
+          {{ submitting ? 'در حال ثبت رزرو…' : 'پرداخت و صدور بلیط' }}
+        </button>
+        <p class="text-[11px] opacity-60 text-center leading-5">
+          این یک نمونه‌ی نمایشی است؛ هیچ مبلغی واقعاً از حساب شما کسر نمی‌شود.
+        </p>
+      </div>
+    </aside>
+  </form>
+</div>

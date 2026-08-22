@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+
+/* The daisyUI `.select` class renders a chevron via background-image.
+   This control is a button, so we drop that arrow entirely. */
+.select {
+  background-image: none !important;
+}
